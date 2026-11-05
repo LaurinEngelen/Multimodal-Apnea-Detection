@@ -6,7 +6,7 @@ Forschungsprojekt zur automatisierten Erkennung von obstruktiver, zentraler und 
 
 ## 🌐 Live Mindmap & Dokumenten-Zentrale (GitHub Pages)
 Die interaktive Web-App kann direkt ohne Installation im Browser aufgerufen werden:  
-👉 **`https://<username>.github.io/<repo-name>/`**
+👉 **[https://laurinengelen.github.io/Multimodal-Apnea-Detection/](https://laurinengelen.github.io/Multimodal-Apnea-Detection/)**
 
 ### Features der Web-App
 - **🗺️ Interaktiver Wissensgraph:** 7 Hauptäste (`Sensoren`, `Medizin`, `Datensätze`, `Datenpipeline`, `Modelle`, `Paper`, `Evaluation`).
