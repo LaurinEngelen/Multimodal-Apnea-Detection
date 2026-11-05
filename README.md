@@ -24,29 +24,23 @@ Die interaktive Web-App kann direkt ohne Installation im Browser aufgerufen werd
 
 ```text
 Teamprojekt/
-├── index.html                     # Einstiegspunkt für GitHub Pages (Web-App)
-├── README.md                      # Projektdokumentation
-├── .gitignore                     # Ignoriert venv, __pycache__, Checkpoints etc.
+├── docs/                          # GitHub Pages Verzeichnis (Mindmap & In-Browser-Viewer)
+│   ├── index.html                 # Haupteinstiegspunkt für GitHub Pages
+│   ├── Papers/                    # PDF-Kopien für den In-Browser-Viewer
+│   └── Zusammenfassungen/         # Berichte & Tabellen für den Viewer
 │
-├── Papers/                        # Die 6 wissenschaftlichen Kern-Paper (PDF)
-│   ├── Obstructive sleep apnea... (Alarcón 2023)
-│   ├── AI-driven approaches... (Peng 2025)
-│   ├── Sleep Apnea Detection Using EEG... (Fathima 2025)
-│   └── ...
-│
-├── Zusammenfassungen/             # Markdown-Berichte, Excel-Matrix & Ausarbeitungen
-│   ├── Teamprojekt_Themen_Graph.html
-│   ├── Teamprojekt_Literatur_Matrix.xlsx
-│   ├── Teamprojekt_Strategie_und_Entscheidungsbericht.md
-│   └── Teamprojekt_Tiefenrecherche_Bericht_Simpel_Ohne_Matrix_PDF.md
+├── Papers/                        # Originale wissenschaftliche Papersammlung
+├── Zusammenfassungen/             # Originale Notizen, Markdown-Berichte & Excel-Matrix
 │
 ├── src/                           # (Geplant) Python-Pipeline, Feature-Extraction, Modelle
 ├── notebooks/                     # (Geplant) Jupyter Notebooks für EDA & Visualisierung
-└── data/                          # (Geplant / .gitignored) NSRR-Datensätze (SHHS, MESA)
+├── data/                          # (Geplant / .gitignored) NSRR-Datensätze (SHHS, MESA)
+├── README.md                      # Projektdokumentation
+└── .gitignore                     # Git-Ignore für Python, venv, Checkpoints etc.
 ```
 
 ---
 
 ## 💻 Lokale Ausführung
-Die Website kann jederzeit offline genutzt werden:  
-Einfach `index.html` per Doppelklick in einem beliebigen Browser öffnen. Es wird kein lokaler Server benötigt.
+Die Website kann jederzeit auch lokal offline genutzt werden:  
+Einfach `docs/index.html` per Doppelklick in einem beliebigen Browser öffnen.
