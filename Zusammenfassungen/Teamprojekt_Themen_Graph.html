@@ -83,6 +83,19 @@
       box-shadow: 0 0 0 3px #3b82f6, 0 12px 28px -4px rgba(37, 99, 235, 0.4) !important;
     }
 
+    /* Section Highlight for Jump-To-Section */
+    @keyframes sectionPulse {
+      0% { background-color: rgba(59, 130, 246, 0.45); }
+      50% { background-color: rgba(59, 130, 246, 0.2); }
+      100% { background-color: transparent; }
+    }
+    .section-highlight {
+      animation: sectionPulse 3s ease-out;
+      border-left: 5px solid #2563eb !important;
+      padding-left: 10px !important;
+      border-radius: 4px;
+    }
+
     /* Markdown Rendered Preview Styling */
     .md-preview h1 { font-size: 1.5rem; font-weight: 800; margin-top: 1.25rem; margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 2px solid rgba(148, 163, 184, 0.3); }
     .md-preview h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
@@ -1562,12 +1575,8 @@
       }
 
       const litWrapper = document.getElementById("modalLiteratureWrapper");
-      if (node.literature) {
-        litWrapper.classList.remove("hidden");
-        document.getElementById("modalLiterature").innerHTML = renderLinkedLiterature(node.literature, node);
-      } else {
-        litWrapper.classList.add("hidden");
-      }
+      litWrapper.classList.remove("hidden");
+      document.getElementById("modalLiterature").innerHTML = renderLinkedLiterature(node.literature, node);
 
       const chWrapper = document.getElementById("modalChildrenWrapper");
       const chList = document.getElementById("modalChildrenList");
@@ -1628,37 +1637,130 @@
       }
     });
 
+    function getNodeTiefenrechercheTarget(node) {
+      if (!node) return "";
+      const id = node.id || "";
+      const t = (node.title || "").toLowerCase();
+
+      // Papers
+      if (id.includes("alarcon") || t.includes("alarcon")) return "Paper 1: Alarcón";
+      if (id.includes("peng") || t.includes("peng")) return "Paper 2: Peng";
+      if (id.includes("fathima") || t.includes("fathima")) return "Paper 3: Fathima";
+      if (id.includes("gaiduk") || t.includes("gaiduk")) return "Paper 4: Gaiduk";
+      if (id.includes("salvi") || t.includes("salvi")) return "Paper 5: Salvi";
+      if (id.includes("secinaro") || t.includes("secinaro")) return "Paper 6: Secinaro";
+      if (id === "h_paper") return "2. Tiefenanalyse";
+
+      // Sensors
+      if (id.includes("spo2") || t.includes("spo2")) return "4.5 Pulsoximetrie";
+      if (id.includes("airflow") || t.includes("airflow") || t.includes("atemfluss")) return "4.6 Respiratorische Sensoren";
+      if (id.includes("belts") || t.includes("rip") || t.includes("gurt")) return "4.6 Respiratorische Sensoren";
+      if (id.includes("eeg") || t.includes("eeg")) return "4.2 Elektroenzephalographie";
+      if (id.includes("ecg") || id.includes("ekg") || t.includes("ekg")) return "4.4 Elektrokardiographie";
+      if (id.includes("emg") || id.includes("eog") || t.includes("eog")) return "4.3 Elektrookulographie";
+      if (id.includes("snore") || id.includes("pos") || t.includes("schnarch") || t.includes("lage")) return "4.7 Akustik";
+      if (id === "h_sensoren") return "4. Biophysik, Sensorik";
+
+      // Medizin
+      if (id.includes("osa") || t.includes("osa") || t.includes("apnoe")) return "3.3 Schlafapnoe";
+      if (id.includes("icsd3") || t.includes("icsd")) return "3.4 Weitere relevante Schlafstörungen";
+      if (id.includes("stages") || t.includes("schlafphase")) return "3.2 Die 5 Schlafphasen";
+      if (id.includes("hypnogram") || id.includes("physio") || t.includes("physiologie")) return "3.1 Physiologie des Schlafs";
+      if (id === "h_medizin") return "3. Medizinisches & Theoretisches";
+
+      // Datensätze
+      if (id.includes("shhs") || id.includes("mesa") || t.includes("shhs") || t.includes("mesa")) return "Gruppe B: Große klinische Kohorten";
+      if (id.includes("ucddb") || t.includes("ucddb") || t.includes("isruc")) return "Gruppe A: Sofort frei herunterladbar";
+      if (id.includes("overview") || id === "h_datensaetze" || t.includes("datensätz")) return "5.1 Übersicht der besten öffentlichen Datensätze";
+
+      // Pipeline
+      if (id.includes("toggle") || t.includes("toggle")) return "5.4 Variables Sensor-Toggle-System";
+      if (id.includes("harm") || id.includes("zscore") || id.includes("pipeline") || id === "h_datenpipeline" || t.includes("pipeline") || t.includes("harmonisier")) return "5.2 Die vereinfachte 4-Stufen-Datenpipeline";
+
+      // Modelle
+      if (id.includes("classic") || t.includes("classic") || t.includes("random forest")) return "Modell A (Ultra-Simpel";
+      if (id.includes("cnn") || t.includes("1d-cnn") || t.includes("deep learning")) return "Modell B (Simples 1D-CNN";
+      if (id.includes("jev") || t.includes("jev") || t.includes("ensemble")) return "6.1 Zwei einfache, bewährte Modell-Architekturen";
+      if (id.includes("compare") || t.includes("vergleich")) return "8.2 Erweiterung B";
+      if (id === "h_modelle") return "6. Simples Modell-Design";
+
+      // Evaluation
+      if (id.includes("kes") || id.includes("exam") || t.includes("kes")) return "1.3 Prüfungsleistungen";
+      if (id.includes("metrics") || id.includes("ahi") || t.includes("ahi") || t.includes("metrik")) return "AHI-Schätzung";
+      if (id.includes("roadmap") || id.includes("time") || t.includes("zeitplan")) return "7.2 Entspannter 10-Wochen-Zeitplan";
+      if (id === "h_evaluation") return "1.3 Prüfungsleistungen";
+
+      // Zentrum
+      if (id === "root") return "1.1 Offizielle Leitfrage";
+
+      return node.title || "";
+    }
+
     function renderLinkedLiterature(litStr, node) {
-      if (!litStr) return "";
       let docTarget = "doc_matrix";
-      if (litStr.includes("Alarcón") || node.id.includes("alarcon")) docTarget = "doc_p1_alarcon";
-      else if (litStr.includes("Peng") || node.id.includes("peng")) docTarget = "doc_p2_peng";
-      else if (litStr.includes("Fathima") || node.id.includes("fathima")) docTarget = "doc_p3_fathima";
-      else if (litStr.includes("Gaiduk") || node.id.includes("gaiduk")) docTarget = "doc_p4_gaiduk";
-      else if (litStr.includes("Salvi") || node.id.includes("salvi")) docTarget = "doc_p5_salvi";
-      else if (litStr.includes("Secinaro") || node.id.includes("secinaro")) docTarget = "doc_p6_secinaro";
+      if (litStr && (litStr.includes("Alarcón") || node.id.includes("alarcon"))) docTarget = "doc_p1_alarcon";
+      else if (litStr && (litStr.includes("Peng") || node.id.includes("peng"))) docTarget = "doc_p2_peng";
+      else if (litStr && (litStr.includes("Fathima") || node.id.includes("fathima"))) docTarget = "doc_p3_fathima";
+      else if (litStr && (litStr.includes("Gaiduk") || node.id.includes("gaiduk"))) docTarget = "doc_p4_gaiduk";
+      else if (litStr && (litStr.includes("Salvi") || node.id.includes("salvi"))) docTarget = "doc_p5_salvi";
+      else if (litStr && (litStr.includes("Secinaro") || node.id.includes("secinaro"))) docTarget = "doc_p6_secinaro";
+
+      const sectionTarget = getNodeTiefenrechercheTarget(node);
+      const displayLit = litStr || (node.parentTitle ? `Kapitel zu ${node.parentTitle}` : "Tiefenrecherche Kompendium");
 
       return `
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div class="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-            📖 ${escapeHtml(litStr)}
+            📖 ${escapeHtml(displayLit)}
           </div>
           <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
             <button type="button" onclick="jumpToDocView('${docTarget}')" class="px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-[11px] border border-blue-200 dark:border-blue-800 shadow-sm flex items-center gap-1 transition cursor-pointer">
               <span>📄 In Dokumenten öffnen</span>
             </button>
-            <button type="button" onclick="jumpToDocView('doc_tiefenrecherche')" class="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-200 dark:border-emerald-800 shadow-sm flex items-center gap-1 transition cursor-pointer">
-              <span>📑 Tiefenrecherche lesen</span>
+            <button type="button" onclick="jumpToDocView('doc_tiefenrecherche', '${escapeHtml(sectionTarget)}')" class="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-200 dark:border-emerald-800 shadow-sm flex items-center gap-1 transition cursor-pointer" title="Springt direkt zum passenden Abschnitt im Tiefenbericht">
+              <span>📑 Tiefenrecherche lesen ➔</span>
             </button>
           </div>
         </div>
       `;
     }
 
-    function jumpToDocView(docId) {
+    function jumpToDocView(docId, targetQuery = "") {
       closeModal();
       switchMainView("docs");
       selectDocument(docId);
+      if (targetQuery && docId === "doc_tiefenrecherche") {
+        scrollToSectionInDoc(targetQuery);
+      }
+    }
+
+    function scrollToSectionInDoc(targetQuery) {
+      if (!targetQuery) return;
+      const q = targetQuery.trim().toLowerCase();
+
+      setTimeout(() => {
+        const container = document.getElementById("viewerContentArea");
+        if (!container) return;
+
+        const headings = container.querySelectorAll("h1, h2, h3, h4, p, strong");
+        let matched = null;
+
+        for (const h of headings) {
+          const text = h.textContent.toLowerCase();
+          if (text.includes(q)) {
+            matched = h;
+            break;
+          }
+        }
+
+        if (matched) {
+          matched.scrollIntoView({ behavior: "smooth", block: "start" });
+          matched.classList.add("section-highlight");
+          setTimeout(() => {
+            matched.classList.remove("section-highlight");
+          }, 3200);
+        }
+      }, 140);
     }
 
     // ============================================================================
@@ -2224,6 +2326,10 @@
         tableRows = [];
       }
 
+      function makeHeadingId(str) {
+        return "sec_" + encodeURIComponent(str.trim().toLowerCase().replace(/[^a-z0-9äöüß]+/gi, "-"));
+      }
+
       for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
 
@@ -2253,13 +2359,13 @@
         }
 
         if (line.startsWith("# ")) {
-          html += `<h1>${formatInline(line.slice(2))}</h1>`;
+          html += `<h1 id="${makeHeadingId(line.slice(2))}">${formatInline(line.slice(2))}</h1>`;
         } else if (line.startsWith("## ")) {
-          html += `<h2>${formatInline(line.slice(3))}</h2>`;
+          html += `<h2 id="${makeHeadingId(line.slice(3))}">${formatInline(line.slice(3))}</h2>`;
         } else if (line.startsWith("### ")) {
-          html += `<h3>${formatInline(line.slice(4))}</h3>`;
+          html += `<h3 id="${makeHeadingId(line.slice(4))}">${formatInline(line.slice(4))}</h3>`;
         } else if (line.startsWith("#### ")) {
-          html += `<h4>${formatInline(line.slice(5))}</h4>`;
+          html += `<h4 id="${makeHeadingId(line.slice(5))}">${formatInline(line.slice(5))}</h4>`;
         } else if (line.trim() === "---") {
           html += "<hr />";
         } else if (line.trim().startsWith("> ")) {
