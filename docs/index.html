@@ -131,6 +131,12 @@
       <h1 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
         Multimodale Schlafapnoe-Detektion
       </h1>
+
+      <!-- SERVER SYNC STATUS BADGE -->
+      <div id="serverStatusBadge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 shadow-xs cursor-pointer transition-all" onclick="loadFromServer(true)" title="Klicken, um Daten vom Server neu zu laden">
+        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+        <span class="hidden md:inline">Serverprüfung...</span>
+      </div>
     </div>
 
     <!-- Right Header Controls -->
@@ -176,7 +182,7 @@
           ⚙️
         </button>
 
-        <div id="settingsDropdown" class="hidden absolute right-0 mt-2 w-60 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl py-1 z-50 text-xs transition-all">
+        <div id="settingsDropdown" class="hidden absolute right-0 mt-2 w-64 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl py-1 z-50 text-xs transition-all">
           <button type="button" onclick="openTeamModal(); closeSettingsMenu();" class="w-full text-left px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer">
             <span class="text-sm">👥</span>
             <span class="font-medium">Team verwalten</span>
@@ -184,6 +190,15 @@
           <button type="button" onclick="autoArrangeNodes(); closeSettingsMenu();" class="w-full text-left px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer">
             <span class="text-sm">📐</span>
             <span class="font-medium">Automatisch anordnen</span>
+          </button>
+          <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+          <button type="button" onclick="loadFromServer(true); closeSettingsMenu();" class="w-full text-left px-3.5 py-2 flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer">
+            <span class="text-sm">🔄</span>
+            <span class="font-medium">Vom Webserver neu laden</span>
+          </button>
+          <button type="button" onclick="saveToServer(true); closeSettingsMenu();" class="w-full text-left px-3.5 py-2 flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer">
+            <span class="text-sm">☁️</span>
+            <span class="font-medium">Jetzt auf Webserver speichern</span>
           </button>
           <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
           <button type="button" onclick="toggleDarkMode(); closeSettingsMenu();" class="w-full text-left px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer">
@@ -615,7 +630,7 @@
   <!-- MAIN MINDMAP APPLICATION LOGIC -->
   <script>
     // ============================================================================
-    // 1. GRAPH DATA (DEFAULT TREE & PERSISTENCE)
+    // 1. DATA MODEL & LOCAL CACHING
     // ============================================================================
     const DEFAULT_GRAPH_DATA = {
       id: "root",
@@ -1100,27 +1115,178 @@
       ]
     };
 
-    // Load custom tree from localStorage if available, otherwise use DEFAULT_GRAPH_DATA
     let GRAPH_DATA = JSON.parse(JSON.stringify(DEFAULT_GRAPH_DATA));
     try {
       const savedTree = localStorage.getItem("ain7_mindmap_tree_v2");
-      if (savedTree) {
-        GRAPH_DATA = JSON.parse(savedTree);
-      }
+      if (savedTree) GRAPH_DATA = JSON.parse(savedTree);
     } catch (e) {
-      console.warn("Could not load saved tree from localStorage:", e);
+      console.warn("Could not load tree from localStorage:", e);
+    }
+
+    function saveGraphTreeLocally() {
+      try {
+        localStorage.setItem("ain7_mindmap_tree_v2", JSON.stringify(GRAPH_DATA));
+      } catch (e) {}
     }
 
     function saveGraphTree() {
-      try {
-        localStorage.setItem("ain7_mindmap_tree_v2", JSON.stringify(GRAPH_DATA));
-      } catch (e) {
-        console.error("Failed to save tree to localStorage:", e);
-      }
+      persistAllData();
     }
 
     // ============================================================================
-    // 2. THEME ENGINE (DARK / LIGHT MODE)
+    // 2. SERVER PERSISTENCE & AUTO-SYNC ENGINE
+    // ============================================================================
+    let serverBackendUrl = null;
+    let isServerConnected = false;
+    let saveDebounceTimer = null;
+
+    async function detectServerBackend() {
+      if (window.location.protocol === "file:") return null;
+      const candidates = ["api.php", "api/data", "/api/data"];
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url + (url.includes("?") ? "&" : "?") + "action=ping&t=" + Date.now(), { method: "GET" });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && (data.status === "ok" || data.backend)) {
+              console.log("Server backend discovered at:", url);
+              return url;
+            }
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+
+    async function initServerSync() {
+      updateServerStatusBadge("checking", "Server wird gesucht...");
+      serverBackendUrl = await detectServerBackend();
+      if (serverBackendUrl) {
+        isServerConnected = true;
+        updateServerStatusBadge("connected", "Server verbunden");
+        await loadFromServer(false);
+      } else {
+        isServerConnected = false;
+        updateServerStatusBadge("local", "Lokal gespeichert (Offline)");
+      }
+    }
+
+    async function loadFromServer(notify = false) {
+      if (!serverBackendUrl) {
+        if (notify) showToast("ℹ️ Kein Webserver aktiv. Daten sind lokal im Browser gesichert.");
+        return;
+      }
+      updateServerStatusBadge("saving", "Lade Daten...");
+      try {
+        const res = await fetch(serverBackendUrl + (serverBackendUrl.includes("?") ? "&" : "?") + "action=load&t=" + Date.now());
+        if (res.ok) {
+          const payload = await res.json();
+          if (payload && payload.tree) {
+            GRAPH_DATA = payload.tree;
+            if (payload.team && Array.isArray(payload.team)) teamMembers = payload.team;
+            if (payload.positions) customNodePositions = payload.positions;
+            if (payload.tasks && Array.isArray(payload.tasks)) userTasks = payload.tasks;
+
+            saveGraphTreeLocally();
+            saveTeamMembersLocally();
+            saveTasksLocally();
+
+            populateAssigneeDropdowns();
+            renderGraph();
+            renderTasks();
+            if (activeModalNode) updateModalAssigneeDisplay(activeModalNode);
+            updateServerStatusBadge("connected", "Server synchronisiert");
+            if (notify) showToast("☁️ Neueste Daten erfolgreich vom Webserver geladen!");
+          } else if (payload && payload.exists === false) {
+            // First time connection: initialize server with current data
+            await saveToServer(false);
+            updateServerStatusBadge("connected", "Server initialisiert");
+          }
+        } else {
+          throw new Error("HTTP " + res.status);
+        }
+      } catch (err) {
+        console.warn("Load from server failed:", err);
+        updateServerStatusBadge("error", "Server-Fehler (Lokal)");
+        if (notify) showToast("⚠️ Serverdaten konnten nicht geladen werden.");
+      }
+    }
+
+    function persistAllData(notify = false) {
+      saveGraphTreeLocally();
+      saveTeamMembersLocally();
+      saveTasksLocally();
+
+      if (serverBackendUrl) {
+        clearTimeout(saveDebounceTimer);
+        saveDebounceTimer = setTimeout(() => {
+          saveToServer(notify);
+        }, 350);
+      }
+    }
+
+    async function saveToServer(notify = false) {
+      if (!serverBackendUrl) {
+        if (notify) showToast("💾 Lokal im Browser gespeichert (Kein Webserver erkannt)");
+        return;
+      }
+      updateServerStatusBadge("saving", "Speichern...");
+      try {
+        const payload = {
+          version: "2.2",
+          tree: GRAPH_DATA,
+          team: teamMembers,
+          positions: customNodePositions,
+          tasks: userTasks
+        };
+        const res = await fetch(serverBackendUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          updateServerStatusBadge("saved", "Gespeichert ✓");
+          setTimeout(() => {
+            if (isServerConnected) updateServerStatusBadge("connected", "Server synchronisiert");
+          }, 2500);
+          if (notify) showToast("☁️ Änderungen dauerhaft auf Webserver gesichert!");
+        } else {
+          throw new Error("HTTP " + res.status);
+        }
+      } catch (err) {
+        console.error("Save to server failed:", err);
+        updateServerStatusBadge("error", "Serverfehler (Lokal gesichert)");
+        showToast("⚠️ Fehler beim Server-Speichern – lokal im Browser gesichert.");
+      }
+    }
+
+    function updateServerStatusBadge(state, text) {
+      const badge = document.getElementById("serverStatusBadge");
+      if (!badge) return;
+      badge.title = `${text} (Klicken zum Aktualisieren)`;
+
+      let dotColor = "bg-slate-400";
+      let animate = "";
+
+      if (state === "connected") {
+        dotColor = "bg-emerald-500";
+      } else if (state === "saving" || state === "checking") {
+        dotColor = "bg-amber-500";
+        animate = "animate-pulse";
+      } else if (state === "saved") {
+        dotColor = "bg-emerald-500";
+      } else if (state === "error") {
+        dotColor = "bg-red-500";
+      }
+
+      badge.innerHTML = `
+        <span class="w-2 h-2 rounded-full ${dotColor} ${animate}"></span>
+        <span class="truncate max-w-[150px] hidden md:inline">${escapeHtml(text)}</span>
+      `;
+    }
+
+    // ============================================================================
+    // 3. THEME ENGINE (DARK / LIGHT MODE)
     // ============================================================================
     let currentTheme = localStorage.getItem("ain7_theme") || "light";
 
@@ -1164,7 +1330,7 @@
     });
 
     // ============================================================================
-    // 3. TOAST NOTIFICATIONS
+    // 4. TOAST NOTIFICATIONS
     // ============================================================================
     function showToast(message, duration = 3000) {
       const container = document.getElementById("toastContainer");
@@ -1183,7 +1349,7 @@
     }
 
     // ============================================================================
-    // 4. TEAM MEMBERS MANAGEMENT ENGINE
+    // 5. TEAM MEMBERS MANAGEMENT ENGINE
     // ============================================================================
     const DEFAULT_TEAM_MEMBERS = [
       { id: "tm_laurin", name: "Laurin", color: "#3b82f6" },
@@ -1199,16 +1365,8 @@
     }
 
     const TEAM_PALETTE = [
-      "#3b82f6", // Blue
-      "#10b981", // Emerald
-      "#f59e0b", // Amber
-      "#8b5cf6", // Purple
-      "#ec4899", // Pink
-      "#06b6d4", // Cyan
-      "#ef4444", // Red
-      "#6366f1", // Indigo
-      "#14b8a6", // Teal
-      "#f97316"  // Orange
+      "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899",
+      "#06b6d4", "#ef4444", "#6366f1", "#14b8a6", "#f97316"
     ];
 
     let selectedNewMemberColor = TEAM_PALETTE[0];
@@ -1222,8 +1380,14 @@
       return parts[0].substring(0, 1).toUpperCase();
     }
 
+    function saveTeamMembersLocally() {
+      try {
+        localStorage.setItem("ain7_team_members_v1", JSON.stringify(teamMembers));
+      } catch (e) {}
+    }
+
     function saveTeamMembers() {
-      localStorage.setItem("ain7_team_members_v1", JSON.stringify(teamMembers));
+      persistAllData();
       populateAssigneeDropdowns();
       renderGraph();
       if (activeModalNode) {
@@ -1374,8 +1538,6 @@
           if (node.rightBranches) node.rightBranches.forEach(unassign);
         }
         unassign(GRAPH_DATA);
-        saveGraphTree();
-
         teamMembers = teamMembers.filter(m => m.id !== memberId);
         saveTeamMembers();
         renderTeamModalList();
@@ -1453,7 +1615,7 @@
           delete found.node.assigneeId;
           delete activeModalNode.assigneeId;
         }
-        saveGraphTree();
+        persistAllData();
         updateModalAssigneeDisplay(found.node);
         renderGraph();
         const member = teamMembers.find(m => m.id === assigneeId);
@@ -1482,7 +1644,7 @@
             delete child.assigneeId;
           }
         });
-        saveGraphTree();
+        persistAllData();
         renderGraph();
         openModal(found.node);
         showToast(`⚡ Alle ${found.node.children.length} Unterpunkte aktualisiert!`);
@@ -1490,7 +1652,7 @@
     }
 
     // ============================================================================
-    // 5. BIDIRECTIONAL COMPACT LAYOUT ENGINE (AUTO-ARRANGE & GENEROUS SPACING)
+    // 6. BIDIRECTIONAL COMPACT LAYOUT ENGINE (AUTO-ARRANGE & GENEROUS SPACING)
     // ============================================================================
     let flatNodes = [];
     let flatEdges = [];
@@ -1539,7 +1701,6 @@
         return count * LEAF_Y_GAP;
       }
 
-      // Vertically center left branches around CENTER_Y
       const totalLeftH = GRAPH_DATA.leftBranches.reduce((sum, b, idx) => sum + getBranchHeight(b) + (idx > 0 ? BRANCH_GAP : 0), 0);
       let leftY = Math.round(CENTER_Y - (totalLeftH / 2));
 
@@ -1597,7 +1758,6 @@
         leftY += branchConsumedH + BRANCH_GAP;
       });
 
-      // Vertically center right branches around CENTER_Y
       const totalRightH = GRAPH_DATA.rightBranches.reduce((sum, b, idx) => sum + getBranchHeight(b) + (idx > 0 ? BRANCH_GAP : 0), 0);
       let rightY = Math.round(CENTER_Y - (totalRightH / 2));
 
@@ -1672,13 +1832,14 @@
       try {
         localStorage.removeItem("ain7_custom_positions_v2");
       } catch (e) {}
+      persistAllData();
       renderGraph();
       fitToScreen();
       showToast("📐 Mindmap automatisch mit optimalen Abständen angeordnet!");
     }
 
     // ============================================================================
-    // 6. RENDER MINDMAP NODES & SVG EDGES
+    // 7. RENDER MINDMAP NODES & SVG EDGES
     // ============================================================================
     const nodesContainer = document.getElementById("nodesContainer");
     const edgesSvg = document.getElementById("edgesSvg");
@@ -1787,7 +1948,7 @@
     }
 
     // ============================================================================
-    // 7. NODE DRAG & DROP
+    // 8. NODE DRAG & DROP
     // ============================================================================
     function attachNodeDrag(cardElement, nodeData) {
       let isNodeDragging = false;
@@ -1840,9 +2001,7 @@
         window.removeEventListener("pointerup", onPointerUp);
 
         if (hasMovedSignificantly) {
-          try {
-            localStorage.setItem("ain7_custom_positions_v2", JSON.stringify(customNodePositions));
-          } catch (e) {}
+          persistAllData();
         } else {
           selectedNodeId = nodeData.id;
           openModal(nodeData);
@@ -1854,7 +2013,7 @@
     }
 
     // ============================================================================
-    // 8. TREE EDITING & CRUD
+    // 9. TREE EDITING & CRUD
     // ============================================================================
     function findNodeInTree(id, current = GRAPH_DATA, parent = null) {
       if (current.id === id) return { node: current, parent: parent };
@@ -1991,7 +2150,7 @@
           if (!parentFound.node.children) parentFound.node.children = [];
           parentFound.node.children.push(newNode);
         }
-        saveGraphTree();
+        persistAllData();
         closeEditModal();
         renderGraph();
         focusNode(newId);
@@ -2012,7 +2171,7 @@
           delete found.node.assigneeId;
         }
 
-        saveGraphTree();
+        persistAllData();
         closeEditModal();
         renderGraph();
         showToast(`💾 Änderungen gespeichert!`);
@@ -2032,10 +2191,7 @@
           found.parent.children = found.parent.children.filter(ch => ch.id !== nodeId);
         }
         delete customNodePositions[nodeId];
-        try {
-          localStorage.setItem("ain7_custom_positions_v2", JSON.stringify(customNodePositions));
-        } catch (e) {}
-        saveGraphTree();
+        persistAllData();
         closeModal();
         renderGraph();
         showToast(`🗑️ Punkt gelöscht.`);
@@ -2048,7 +2204,7 @@
     }
 
     // ============================================================================
-    // 9. MODAL POPUP FOR NODE DETAILS & CROSS-LINKING
+    // 10. MODAL POPUP FOR NODE DETAILS & CROSS-LINKING
     // ============================================================================
     let activeModalNode = null;
     let selectedNodeId = null;
@@ -2133,14 +2289,13 @@
     }
 
     // ============================================================================
-    // 10. DEEP-LINKING TO SPECIFIC SECTIONS IN TIEFENBERICHT
+    // 11. DEEP-LINKING TO SPECIFIC SECTIONS IN TIEFENBERICHT
     // ============================================================================
     function getNodeTiefenrechercheTarget(node) {
       if (!node) return null;
       const id = node.id || "";
       const title = (node.title || "").toLowerCase();
 
-      // Explicit ID and Title checks
       if (id === "p_alarcon" || title.includes("alarcón") || title.includes("alarcon")) return "Paper 1: Alarcón";
       if (id === "p_peng" || title.includes("peng")) return "Paper 2: Peng";
       if (id === "p_fathima" || title.includes("fathima")) return "Paper 3: Fathima";
@@ -2149,7 +2304,6 @@
       if (id === "p_secinaro" || title.includes("secinaro")) return "Paper 6: Secinaro";
       if (id === "h_paper") return "2. Tiefenanalyse der 6 Kern-Paper";
 
-      // Sensors
       if (id === "s_spo2" || title.includes("spo2") || title.includes("pulsoximetrie")) return "4.5 Pulsoximetrie (SpO2)";
       if (id === "s_airflow" || title.includes("airflow") || title.includes("atemfluss")) return "4.6 Respiratorische Sensoren";
       if (id === "s_eeg" || title.includes("eeg") || title.includes("elektroenzephalographie")) return "4.2 Elektroenzephalographie (EEG)";
@@ -2158,28 +2312,23 @@
       if (id === "s_snore" || id === "s_audio" || title.includes("akustik") || title.includes("audio") || title.includes("lage")) return "4.7 Akustik & Körperschall / Körperlage";
       if (id === "h_sensoren") return "4. Biophysik, Sensorik & Biosignal-Verarbeitung";
 
-      // Medicine
       if (id === "m_osa" || id === "m_definition" || title.includes("obstruktive") || title.includes("osa")) return "3.3 Schlafapnoe: Krankheitsbild, Typen & Schweregrade";
       if (id === "m_csa" || id === "m_icsd" || title.includes("zentrale") || title.includes("icsd")) return "3.4 Weitere relevante Schlafstörungen (ICSD-3)";
       if (id === "m_rem" || id === "m_phasen" || title.includes("schlafphasen") || title.includes("stadien")) return "3.2 Die 5 Schlafphasen & Schlafarchitektur";
       if (id === "m_physio" || id === "h_medizin") return "3. Medizinische Grundlagen & Schlafphysiologie";
 
-      // Datasets
       if (id === "d_shhs" || id === "d_mesa" || title.includes("shhs") || title.includes("mesa")) return "Gruppe B: Große klinische Kohorten";
       if (id === "d_ucddb" || title.includes("ucddb") || title.includes("download")) return "Gruppe A: Sofort frei herunterladbar";
       if (id === "h_datensaetze") return "5.1 Übersicht der besten öffentlichen Datensätze";
 
-      // Pipeline
       if (id === "pipe_toggle" || title.includes("toggle") || title.includes("system")) return "5.4 Variables Sensor-Toggle-System";
       if (id === "h_datenpipeline" || title.includes("pipeline") || title.includes("vorverarbeitung")) return "5.2 Die vereinfachte 4-Stufen-Datenpipeline";
 
-      // Models
       if (id === "mod_rf" || title.includes("random forest") || title.includes("classic ml") || title.includes("xgboost")) return "Modell A (Ultra-Simpel): Tabellarisches Classic-ML (Random Forest / XGBoost)";
       if (id === "mod_cnn" || title.includes("cnn") || title.includes("1d-cnn")) return "Modell B (Simples 1D-CNN): End-to-End Deep Learning auf Biosignalen";
       if (id === "mod_eeg" || title.includes("multimodal") || title.includes("fusion")) return "8.2 Erweiterung B (Multi-Modalität & EEG-Vergleich)";
       if (id === "h_modelle") return "6.1 Zwei einfache, bewährte Modell-Architekturen";
 
-      // Evaluation
       if (id === "ev_pruefung" || id === "ev_kes" || title.includes("prüf") || title.includes("kes") || title.includes("kolloquium")) return "1.3 Prüfungsleistungen & Bewertungskriterien (AIN7)";
       if (id === "ev_ahi" || title.includes("ahi") || title.includes("metriken")) return "AHI-Schätzung & Korrelation";
       if (id === "ev_zeitplan" || title.includes("zeitplan") || title.includes("woche")) return "7.2 Entspannter 10-Wochen-Zeitplan";
@@ -2190,8 +2339,6 @@
 
     function renderLinkedLiterature(litStr, node) {
       const targetQuery = getNodeTiefenrechercheTarget(node);
-      const queryParam = targetQuery ? `&query=${encodeURIComponent(targetQuery)}` : "";
-
       let html = "";
       if (litStr && litStr.trim().length > 0) {
         html += `<div class="mb-2 font-medium text-slate-800 dark:text-slate-200">📚 <b>Referenz:</b> ${escapeHtml(litStr)}</div>`;
@@ -2225,7 +2372,7 @@
       if (!activeModalNode) return;
       const text = `Recherche vertiefen: ${activeModalNode.title} (${activeModalNode.parentTitle || 'Allgemein'})`;
       userTasks.push({ id: Date.now(), text: text, done: false });
-      saveTasks();
+      persistAllData();
       renderTasks();
       closeModal();
       toggleSidebar(true);
@@ -2233,7 +2380,7 @@
     }
 
     // ============================================================================
-    // 11. VIEWPORT ZOOM, PAN & NAVIGATION
+    // 12. VIEWPORT ZOOM, PAN & NAVIGATION
     // ============================================================================
     const viewport = document.getElementById("viewport");
     const world = document.getElementById("world");
@@ -2348,7 +2495,7 @@
     }, { passive: false });
 
     // ============================================================================
-    // 12. VIEW SWITCHER (GRAPH VS DOCUMENTS)
+    // 13. VIEW SWITCHER (GRAPH VS DOCUMENTS)
     // ============================================================================
     let currentMainView = "graph";
 
@@ -2436,7 +2583,7 @@
     }
 
     // ============================================================================
-    // 13. DOCUMENTS CATALOG & VIEWER LOGIC
+    // 14. DOCUMENTS CATALOG & VIEWER LOGIC
     // ============================================================================
     const PROJECT_DOCUMENTS = [
       {
@@ -2670,7 +2817,7 @@
     }
 
     // ============================================================================
-    // 14. EXCEL TABLE RENDERER
+    // 15. EXCEL TABLE RENDERER
     // ============================================================================
     function renderExcelTable(data) {
       if (!data || !data.rows || data.rows.length === 0) {
@@ -2715,7 +2862,7 @@
     }
 
     // ============================================================================
-    // 15. SIMPLE MARKDOWN TO HTML RENDERER
+    // 16. SIMPLE MARKDOWN TO HTML RENDERER
     // ============================================================================
     function makeHeadingId(text) {
       return text.toLowerCase()
@@ -2826,7 +2973,7 @@
     }
 
     // ============================================================================
-    // 16. TASKS & NOTES SIDEBAR LOGIC
+    // 17. TASKS & NOTES SIDEBAR LOGIC
     // ============================================================================
     const DEFAULT_TASKS = [
       { id: 1, text: "UCDDB Datensatz herunterladen und Signale mit WFDB inspizieren", done: false },
@@ -2844,8 +2991,15 @@
       userTasks = DEFAULT_TASKS;
     }
 
+    function saveTasksLocally() {
+      try {
+        localStorage.setItem("ain7_tasks", JSON.stringify(userTasks));
+      } catch (e) {}
+      updateTaskCounters();
+    }
+
     function saveTasks() {
-      localStorage.setItem("ain7_tasks", JSON.stringify(userTasks));
+      persistAllData();
       updateTaskCounters();
     }
 
@@ -2920,7 +3074,7 @@
     }
 
     // ============================================================================
-    // 17. EXPORT & RESET ACTIONS
+    // 18. EXPORT & RESET ACTIONS
     // ============================================================================
     function exportGraphJson() {
       const exportData = {
@@ -2928,7 +3082,8 @@
         exportedAt: new Date().toISOString(),
         tree: GRAPH_DATA,
         team: teamMembers,
-        customPositions: customNodePositions
+        positions: customNodePositions,
+        tasks: userTasks
       };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
       const a = document.createElement("a");
@@ -2946,6 +3101,7 @@
         localStorage.removeItem("ain7_custom_positions_v2");
         GRAPH_DATA = JSON.parse(JSON.stringify(DEFAULT_GRAPH_DATA));
         customNodePositions = {};
+        persistAllData();
         renderGraph();
         fitToScreen();
         showToast("🔄 Mindmap auf Standard zurückgesetzt!");
@@ -2978,6 +3134,7 @@
       renderGraph();
       renderTasks();
       fitToScreen();
+      initServerSync();
     });
 
     window.addEventListener("resize", () => {

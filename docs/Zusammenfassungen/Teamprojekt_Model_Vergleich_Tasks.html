@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Teamprojekt AIN - Modellvergleich & Aufgabenpakete (PSG & Sleep Apnea)</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 14mm 16mm 14mm;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    line-height: 1.5;
+    font-size: 9.5pt;
+    margin: 0;
+    padding: 0;
+  }
+  .header-box {
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+  .header-top {
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #64748b;
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 16pt;
+    margin: 6px 0 4px 0;
+    color: #0f172a;
+    font-weight: 700;
+  }
+  .subtitle {
+    font-size: 9.5pt;
+    color: #475569;
+    margin-bottom: 8px;
+  }
+  .meta-grid {
+    display: flex;
+    gap: 14px;
+    font-size: 8.5pt;
+    color: #334155;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+  }
+  .meta-item strong {
+    color: #0f172a;
+  }
+  .intro-box {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 18px;
+    font-size: 9pt;
+  }
+  .intro-box h3 {
+    margin: 0 0 4px 0;
+    font-size: 10.5pt;
+    color: #1e40af;
+  }
+  .task-card {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    page-break-inside: avoid;
+  }
+  .task-header {
+    background: #f1f5f9;
+    padding: 9px 14px;
+    border-bottom: 1px solid #cbd5e1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .task-title-group h2 {
+    margin: 0;
+    font-size: 11pt;
+    color: #0f172a;
+    font-weight: 700;
+  }
+  .task-subtitle {
+    font-size: 8pt;
+    color: #64748b;
+    margin-top: 2px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-baseline { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+  .badge-ml { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+  .badge-seq { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+  .badge-fusion { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+  .badge-transformer { background: #ccfbf1; color: #115e59; border: 1px solid #99f6e4; }
+  
+  .task-body {
+    padding: 10px 14px;
+  }
+  .paper-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 7px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 8.5pt;
+    line-height: 1.45;
+  }
+  .paper-info strong {
+    color: #0f172a;
+  }
+  .paper-info a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .slide-plan {
+    margin-top: 6px;
+  }
+  .slide-plan h4 {
+    margin: 6px 0 4px 0;
+    font-size: 8.5pt;
+    color: #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .slide-row {
+    margin-bottom: 5px;
+    padding: 6px 10px;
+    background: #ffffff;
+    border-left: 3px solid #94a3b8;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .slide-row strong {
+    color: #1e293b;
+    font-size: 8.5pt;
+  }
+  .slide-row ul {
+    margin: 3px 0 2px 16px;
+    padding: 0;
+    font-size: 8pt;
+    color: #475569;
+  }
+  .slide-row li {
+    margin-bottom: 1.5px;
+  }
+  .core-question {
+    background: #fefce8;
+    border: 1px solid #fef08a;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 8pt;
+    color: #854d0e;
+    margin-top: 6px;
+  }
+  .core-question strong {
+    color: #713f12;
+  }
+  .page-break {
+    page-break-after: always;
+  }
+  .guide-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 8pt;
+  }
+  .guide-table th, .guide-table td {
+    border: 1px solid #cbd5e1;
+    padding: 5px 8px;
+    text-align: left;
+  }
+  .guide-table th {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-box">
+  <div class="header-top">HTWG Konstanz &bull; Ubiquitous Computing Lab &bull; AIN Semester 7 (WS 2026/27)</div>
+  <h1>Teamprojekt: Modell-Vergleich f&uuml;r Schlafapnoe-Klassifikation</h1>
+  <div class="subtitle">Aufgabenverteilung &amp; 3-Folien-Pr&auml;sentationsleitfaden f&uuml;r die Teammitglieder</div>
+  <div class="meta-grid">
+    <div class="meta-item"><strong>Fokus:</strong> 100% Polysomnographie (PSG) &amp; Obstructive Sleep Apnea (OSA)</div>
+    <div class="meta-item"><strong>Format:</strong> Genau 3 Folien pro Person (3–5 Min. Pitch)</div>
+    <div class="meta-item"><strong>Ziel:</strong> Methodisches Fundament f&uuml;r KES-Paper &amp; Software-Architektur</div>
+  </div>
+</div>
+
+<div class="intro-box">
+  <h3>Zweck &amp; Spielregeln f&uuml;r unser n&auml;chstes Team-Meeting</h3>
+  <p style="margin: 0 0 5px 0;">
+    Jedes Teammitglied erarbeitet eigenst&auml;ndig <strong>eines der 5 Schwerpunktthemen</strong> anhand des zugeteilten Papers. 
+    Alle 5 Paper basieren vollst&auml;ndig auf <strong>Polysomnographie-Daten (PSG)</strong> (z. B. SHHS, MESA, Apnea-ECG, UCDDB) und konzentrieren sich direkt auf <strong>Schlafapnoe-Erkennung</strong>.
+  </p>
+  <p style="margin: 0;">
+    <strong>Einheitlicher 3-Folien-Standard:</strong> Folie 1: <em>Architektur &amp; PSG-Datenfluss</em> &bull; Folie 2: <em>Schwerpunktthema</em> &bull; Folie 3: <em>Bewertung &amp; Vor-/Nachteile f&uuml;rs Projekt</em>.
+  </p>
+</div>
+
+<!-- TASK 1 -->
+<div class="task-card">
+  <div class="task-header">
+    <div class="task-title-group">
+      <h2>Task 1: Die Labor-Baseline &amp; Grad-CAM (1D-CNN)</h2>
+      <div class="task-subtitle">Zust&auml;ndig: Teammitglied 1 &bull; Fokus: End-to-End 1D-Faltungsnetze &amp; gradientenbasierte Erkl&auml;rbarkeit</div>
+    </div>
+    <span class="badge badge-baseline">1D-CNN Baseline</span>
+  </div>
+  <div class="task-body">
+    <div class="paper-info">
+      <strong>Zugeh&ouml;riges Paper:</strong> &Aacute;. Serrano Alarc&oacute;n, R. Seepold et al. (2023): <em>Obstructive sleep apnea event detection using explainable deep learning models for a portable monitor.</em> Frontiers in Neuroscience.<br>
+      <strong>PSG-Datens&auml;tze:</strong> SHHS1, SHHS2 &amp; MESA (Voll-Polysomnographie) &bull; 
+      <strong>PSG-Sensoren:</strong> SpO2, Puls/HR, Thorax- &amp; Abdomen-Atmungsgurte (1 Hz, 60s)<br>
+      <strong>Quellen:</strong> Lokal im Ordner <code>docs/Papers/</code> &bull; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10157077/pdf/fnins-17-1112732.pdf">Direktes PDF (PMC10157077)</a> &bull; <a href="https://www.frontiersin.org/articles/10.3389/fnins.2023.1112732/full">Frontiers Volltext</a>
+    </div>
+    <div class="slide-plan">
+      <h4>Erwartetes 3-Folien-Ergebnis:</h4>
+      <div class="slide-row">
+        <strong>Folie 1: Architektur &amp; Datenfluss</strong>
+        <ul>
+          <li>4 parallele Biosignalkan&auml;le auf 1 Hz herabgetaktet im 60s-Fenster ($4 \times 60$ Tensor).</li>
+          <li>1D-Faltungsschichten zur Merkmalsextraktion + Global Average Pooling (GAP) anstelle dichter Fully-Connected-Schichten.</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 2: XAI-Schwerpunkt – Wie rechnet Grad-CAM?</strong>
+        <ul>
+          <li>Mathematisches Prinzip: R&uuml;ckrechnung der Gradienten der Apnoe-Klasse auf die letzte Faltungsschicht.</li>
+          <li>Visuelles Ergebnis: Farbige Heatmap direkt &uuml;ber dem Signalverlauf zeigt, welche Sekunden die Apnoe indizieren.</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 3: Bewertung &amp; bekannte Schw&auml;chen f&uuml;rs Teamprojekt</strong>
+        <ul>
+          <li><em>Vorteile:</em> Labor-Referenz von Prof. Seepold (Pflicht-Vergleichswert); extrem schnell (&lt;5 ms Inferenz auf Laptop-CPU).</li>
+          <li><em>Limitierungen:</em> AHI wird &uuml;bersch&auml;tzt (nutzt Gesamtaufzeichnung TRT statt reiner Schlafzeit TST); Informationsverlust durch 1 Hz; isolierte Fenster ohne Zeitkontext.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="core-question">
+      <strong>Kernfrage f&uuml;rs Meeting:</strong> Warum ist dieses Modell unsere Pflicht-Baseline, und an welchen konkreten Stellen (z. B. TST-Berechnung, h&ouml;here Frequenzen) m&uuml;ssen wir es zwingend verbessern?
+    </div>
+  </div>
+</div>
+
+<!-- TASK 2 -->
+<div class="task-card">
+  <div class="task-header">
+    <div class="task-title-group">
+      <h2>Task 2: Klassisches Machine Learning (Feature Engineering + Random Forest)</h2>
+      <div class="task-subtitle">Zust&auml;ndig: Teammitglied 2 &bull; Fokus: Handgefertigte Kennzahlen &amp; tabellarische Klassifikatoren vs. Deep Learning</div>
+    </div>
+    <span class="badge badge-ml">Classical ML</span>
+  </div>
+  <div class="task-body">
+    <div class="paper-info">
+      <strong>Zugeh&ouml;riges Paper:</strong> J. Zhu, A. Zhou, Q. Gong et al. (2022): <em>Detection of Sleep Apnea from Electrocardiogram and Pulse Oximetry Signals Using Random Forest.</em> Applied Sciences (MDPI).<br>
+      <strong>PSG-Datensatz:</strong> Apnea-ECG Database (PhysioNet overnight PSG) &bull; 
+      <strong>PSG-Sensoren:</strong> EKG &amp; SpO2 (Pulse Oximetry)<br>
+      <strong>Quellen:</strong> <a href="https://www.mdpi.com/2076-3417/12/9/4218/pdf">Direktes PDF (MDPI)</a> &bull; <a href="https://www.mdpi.com/2076-3417/12/9/4218">MDPI Webversion</a> &bull; PMC9103632
+    </div>
+    <div class="slide-plan">
+      <h4>Erwartetes 3-Folien-Ergebnis:</h4>
+      <div class="slide-row">
+        <strong>Folie 1: Der klassische zweistufige ML-Workflow auf PSG-Daten</strong>
+        <ul>
+          <li>Gegen&uuml;berstellung: Menschliches Expertenwissen (Feature Engineering) vs. automatische Merkmalsfindung (Deep Learning).</li>
+          <li>Pipeline: PSG-Rohdaten &rarr; Feature Extraction &rarr; Feature Selection (RFECV) &rarr; Random Forest / SVM.</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 2: Welche PSG-Kennzahlen entscheiden &uuml;ber Apnoe?</strong>
+        <ul>
+          <li>EKG-HRV-Kennzahlen im Zeitbereich (SDNN, RMSSD) und Frequenzbereich (LF/HF-Ratio, spektrale Leistungsdichte).</li>
+          <li>SpO2-Ents&auml;ttigungsmerkmale (Oxygen Desaturation Index ODI, min/max SpO2-Dips, Varianz).</li>
+          <li>Wie RFECV (Recursive Feature Elimination) die 15–20 aussagekr&auml;ftigsten Features isoliert.</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 3: Bewertung f&uuml;rs Teamprojekt &amp; KES-Paper</strong>
+        <ul>
+          <li><em>Vorteile:</em> Trainiert in Sekunden auf CPU; 97,5 % Accuracy; volle Akzeptanz bei &Auml;rzten (Features sind Standard-Diagnostik); Feature-Importance (Gini/SHAP).</li>
+          <li><em>Nachteile:</em> Findet keine neuen Muster abseits der Formeln; anf&auml;llig f&uuml;r Rauschen/Artefakte; hoher manueller Vorbereitungsaufwand.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="core-question">
+      <strong>Kernfrage f&uuml;rs Meeting:</strong> Sollen wir Random Forest als leichtgewichtige Vergleichs-Baseline in unserer Software und im KES-Paper mitlaufen lassen?
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- TASK 3 -->
+<div class="task-card">
+  <div class="task-header">
+    <div class="task-title-group">
+      <h2>Task 3: Sequentieller Kontext &amp; Zeitdynamik (Hybrid CNN-LSTM)</h2>
+      <div class="task-subtitle">Zust&auml;ndig: Teammitglied 3 &bull; Fokus: Physiologische Zeitverz&ouml;gerungen &amp; Ged&auml;chtnis &uuml;ber mehrere Minuten</div>
+    </div>
+    <span class="badge badge-seq">Hybrid CRNN</span>
+  </div>
+  <div class="task-body">
+    <div class="paper-info">
+      <strong>Zugeh&ouml;riges Paper:</strong> B. Wang, X. Deng et al. (2021): <em>Automatic Detection of Obstructive Sleep Apnea Events Using a Deep CNN-LSTM Model.</em> Computational Intelligence and Neuroscience.<br>
+      <strong>PSG-Datensatz:</strong> Apnea-ECG Polysomnographie (PhysioNet) &bull; 
+      <strong>PSG-Sensoren:</strong> EKG-Zeitserien &amp; Atmungsreaktionen aus der PSG<br>
+      <strong>Quellen:</strong> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8009718/pdf/CIN2021-5573489.pdf">Direktes PDF (PMC8009718)</a> &bull; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8009718/">PMC Webversion</a>
+    </div>
+    <div class="slide-plan">
+      <h4>Erwartetes 3-Folien-Ergebnis:</h4>
+      <div class="slide-row">
+        <strong>Folie 1: Die hybride CNN-LSTM Architektur (CRNN)</strong>
+        <ul>
+          <li>Multi-Scale 1D-CNN extrahiert lokale Kurvenmorphologien im aktuellen Zeitfenster.</li>
+          <li>Nachgeschaltetes LSTM verarbeitet die Merkmalsvektoren sequentiell und lernt Abh&auml;ngigkeiten zwischen aufeinanderfolgenden Minuten.</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 2: Warum braucht Apnoe-Erkennung ein zeitliches Ged&auml;chtnis?</strong>
+        <ul>
+          <li>Physiologische Verz&ouml;gerung: Sauerstoffabfall (SpO2) tritt erst <strong>15–30 Sekunden nach</strong> dem Atemstillstand auf; danach folgt Aufwach-Tachykardie.</li>
+          <li>Isolierte CNN-Fenster &uuml;bersehen diese Kettenreaktion; das LSTM gl&auml;ttet unruhiges &bdquo;Flackern&ldquo; der Erkennung zwischen den Minuten.</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 3: Bewertung f&uuml;rs Teamprojekt &amp; Software</strong>
+        <ul>
+          <li><em>Vorteile:</em> Decken von zeitlich versetzten Ereignissen; realistischere Abbildung der Schlafpathologie; hohe Sensitivit&auml;t (96,1 %).</li>
+          <li><em>Nachteile:</em> L&auml;ngeres Training (schwerer parallelisierbar); XAI wird komplexer (LSTM ist eine Black-Box, Grad-CAM l&auml;uft nur auf CNN-Teil).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="core-question">
+      <strong>Kernfrage f&uuml;rs Meeting:</strong> Rechtfertigt der Genauigkeitsgewinn durch das Zeitged&auml;chtnis (LSTM) den h&ouml;heren Trainings- und Erkl&auml;rungsaufwand gegen&uuml;ber reinen 1D-CNNs?
+    </div>
+  </div>
+</div>
+
+<!-- TASK 4 -->
+<div class="task-card">
+  <div class="task-header">
+    <div class="task-title-group">
+      <h2>Task 4: PSG-Sensorstrategie: Einheitsmodell vs. Modell pro Sensortyp</h2>
+      <div class="task-subtitle">Zust&auml;ndig: Teammitglied 4 &bull; Fokus: Early Fusion (Alarc&oacute;n 4-Kanal) vs. Late/Decision Fusion bei PSG-Sensorausfall</div>
+    </div>
+    <span class="badge badge-fusion">Sensor Fusion</span>
+  </div>
+  <div class="task-body">
+    <div class="paper-info">
+      <strong>Paper 1 (Praxis):</strong> &Aacute;. Serrano Alarc&oacute;n et al. (2023) – 4-Kanal PSG-Einheitsmodell (liegt in <code>docs/Papers/</code>)<br>
+      <strong>Paper 2 (Theorie):</strong> M. Salvi et al. (2024): <em>Multi-modality approaches for medical support systems.</em> Information Fusion (liegt in <code>docs/Papers/</code>)<br>
+      <strong>PSG-Sensoren:</strong> SpO2, EKG/HR, Thorax- &amp; Abdomen-Atmungsgurte &bull; 
+      <strong>Quellen:</strong> <a href="https://doi.org/10.1016/j.inffus.2023.102134">Salvi et al. ScienceDirect</a> &bull; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10157077/pdf/fnins-17-1112732.pdf">Alarc&oacute;n et al. PDF</a>
+    </div>
+    <div class="slide-plan">
+      <h4>Erwartetes 3-Folien-Ergebnis:</h4>
+      <div class="slide-row">
+        <strong>Folie 1: Gegen&uuml;berstellung der beiden Fusions-Paradigmen</strong>
+        <ul>
+          <li><em>Early Fusion (Alarc&oacute;n et al.):</em> 4 PSG-Sensorkan&auml;le werden in einen gemeinsamen Tensor ($4 \times 60$) geklebt und durch 1 einziges Netz geschleust.</li>
+          <li><em>Late / Decision Fusion (Salvi et al.):</em> Modell 1 (SpO2-Spezialist) + Modell 2 (Puls-Spezialist) + Modell 3 (Atmungs-Spezialist) stimmen am Ende ab.</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 2: Der PSG-Stresstest (Sensorausfall &amp; Abtastraten)</strong>
+        <ul>
+          <li><em>Abtastraten-Problem:</em> Alarc&oacute;n muss alles auf 1 Hz heruntersamplen (verliert feine EKG-Details); getrennte Modelle erlauben native Abtastraten (z. B. 250 Hz EKG).</li>
+          <li><em>Sensorausfall:</em> Was passiert, wenn der SpO2-Fingerclip nachts abrutscht? (Einheitsmodell scheitert komplett; Decision Fusion ignoriert SpO2 und l&auml;uft mit Atmung weiter).</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 3: Empfehlung f&uuml;r unsere Software-Architektur</strong>
+        <ul>
+          <li>Gegen&uuml;berstellung: Kompaktes Einheitsmodell (schnell trainiert) vs. modularer Multimodell-Ansatz (extrem robust &amp; transparent im Dashboard).</li>
+          <li>Fazit: Wie flexibel muss unsere GUI auf unvollst&auml;ndige PSG-Aufzeichnungen reagieren k&ouml;nnen?</li>
+        </ul>
+      </div>
+    </div>
+    <div class="core-question">
+      <strong>Kernfrage f&uuml;rs Meeting:</strong> Setzen wir auf ein starres 4-Kanal-Netzwerk oder auf eine modulare Architektur, die auch bei Ausfall eines Sensors eine Diagnose liefert?
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- TASK 5 -->
+<div class="task-card">
+  <div class="task-header">
+    <div class="task-title-group">
+      <h2>Task 5: Multimodaler PSG-Transformer &amp; Cross-Attention</h2>
+      <div class="task-subtitle">Zust&auml;ndig: Teammitglied 5 &bull; Fokus: Multi-Scale Transformer, dynamische Signal-Interaktion &amp; AHI-Schweregrad</div>
+    </div>
+    <span class="badge badge-transformer">SOTA Transformer</span>
+  </div>
+  <div class="task-body">
+    <div class="paper-info">
+      <strong>Zugeh&ouml;riges Paper:</strong> Y. Zhang, L. Zhou, S. Zhu et al. (Januar 2025): <em>Deep Learning for Obstructive Sleep Apnea Detection and Severity Assessment: A Multimodal Signals Fusion Multiscale Transformer Model.</em> Nature and Science of Sleep.<br>
+      <strong>PSG-Datens&auml;tze:</strong> 510 klinische PSG-Patienten + Apnea-ECG + UCDDB (University College Dublin Sleep Apnea Database)<br>
+      <strong>PSG-Sensoren:</strong> EKG &amp; SpO2 &bull; 
+      <strong>Quellen:</strong> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11736780/pdf/nss-17-1.pdf">Direktes PDF (PMC11736780)</a> &bull; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11736780/">PMC Webversion</a>
+    </div>
+    <div class="slide-plan">
+      <h4>Erwartetes 3-Folien-Ergebnis:</h4>
+      <div class="slide-row">
+        <strong>Folie 1: Die Multiscale Transformer Architektur</strong>
+        <ul>
+          <li>Getrennte Vorverarbeitung f&uuml;r EKG und SpO2 &rarr; Einspeisung in <strong>Cross-Modal Interaction Blocks</strong> (Signal A gewichtet Signal B).</li>
+          <li>Multi-Scale Transformer f&auml;ngt sowohl kurze Sekunden-Anomalien als auch &uuml;bergeordnete Trends &uuml;ber die Nacht ein.</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 2: AHI-Schweregrad &amp; Attention-Erkl&auml;rbarkeit</strong>
+        <ul>
+          <li>Bestimmt nicht nur Apnoe-Episoden, sondern berechnet direkt den klinischen AHI-Schweregrad (leicht, mittel, schwer) mit &uuml;ber 96 % Zuverl&auml;ssigkeit.</li>
+          <li>Intrinsische Erkl&auml;rbarkeit: Attention-Heatmaps zeigen dem Arzt live, wie stark sich das Modell auf SpO2 vs. EKG gest&uuml;tzt hat.</li>
+        </ul>
+      </div>
+      <div class="slide-row">
+        <strong>Folie 3: Bewertung f&uuml;rs Teamprojekt &amp; KES-Paper</strong>
+        <ul>
+          <li><em>St&auml;rken:</em> Modernste SOTA-Referenz (2025) direkt f&uuml;r Schlafapnoe auf PSG; perfekte methodische Antwort auf unsere Kernfrage (multimodale Fusion).</li>
+          <li><em>H&uuml;rden:</em> Anspruchsvoller in PyTorch umzusetzen; h&ouml;herer Hyperparameter- und Regularisierungsbedarf gegen Overfitting.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="core-question">
+      <strong>Kernfrage f&uuml;rs Meeting:</strong> Bietet uns dieser SOTA-Transformer genug Innovationsvorteil im KES-Paper, um den h&ouml;heren Programmieraufwand im Team zu rechtfertigen?
+    </div>
+  </div>
+</div>
+
+<div class="intro-box" style="background: #f8fafc; border-left: 4px solid #64748b; margin-top: 14px;">
+  <h3 style="color: #334155;">Zusammenfassung: Wie alles im Meeting zusammenl&auml;uft</h3>
+  <table class="guide-table">
+    <tr>
+      <th>Task</th>
+      <th>Modell-Typ</th>
+      <th>Zentrale Frage f&uuml;r unser Projekt</th>
+      <th>Hauptrolle im KES-Paper</th>
+    </tr>
+    <tr>
+      <td><strong>Task 1</strong></td>
+      <td>1D-CNN (Alarc&oacute;n)</td>
+      <td>Reichen isolierte Fenster &amp; 1-Hz-Sampling?</td>
+      <td>Die unumg&auml;ngliche Labor-Baseline von Prof. Seepold</td>
+    </tr>
+    <tr>
+      <td><strong>Task 2</strong></td>
+      <td>Random Forest (Zhu)</td>
+      <td>Brauchen wir &uuml;berhaupt Deep Learning?</td>
+      <td>Der transparente, klassische Benchmark (Explainability)</td>
+    </tr>
+    <tr>
+      <td><strong>Task 3</strong></td>
+      <td>CNN-LSTM (Wang)</td>
+      <td>L&ouml;st Zeitged&auml;chtnis das SpO2-Verz&ouml;gerungsproblem?</td>
+      <td>Der Nachweis f&uuml;r den Nutzen temporaler Dynamik</td>
+    </tr>
+    <tr>
+      <td><strong>Task 4</strong></td>
+      <td>Early vs. Late Fusion (Salvi/Alarc&oacute;n)</td>
+      <td>Was passiert in der Praxis bei Sensorausfall?</td>
+      <td>Die Begr&uuml;ndung f&uuml;r unsere Software-Architektur</td>
+    </tr>
+    <tr>
+      <td><strong>Task 5</strong></td>
+      <td>Cross-Attention Transformer (Zhang)</td>
+      <td>Wie nutzen wir Multimodalit&auml;t maximal aus?</td>
+      <td>Der State-of-the-Art Innovationsbeitrag unseres Papers</td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

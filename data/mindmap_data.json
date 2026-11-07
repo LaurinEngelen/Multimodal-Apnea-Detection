@@ -1,0 +1,45 @@
+{
+  "version": "2.2",
+  "updatedAt": "2026-11-07T16:00:00.000Z",
+  "tree": {},
+  "team": [
+    {
+      "id": "tm_laurin",
+      "name": "Laurin",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "tm_2",
+      "name": "Teammitglied 2",
+      "color": "#10b981"
+    }
+  ],
+  "positions": {},
+  "tasks": [
+    {
+      "id": 1,
+      "text": "UCDDB Datensatz herunterladen und Signale mit WFDB inspizieren",
+      "done": false
+    },
+    {
+      "id": 2,
+      "text": "Airflow vs. SpO2 vs. ECG Signal-Gegenüberstellung im Team besprechen",
+      "done": false
+    },
+    {
+      "id": 3,
+      "text": "1D-CNN Baseline auf SpO2 trainieren und F1-Score ermitteln",
+      "done": false
+    },
+    {
+      "id": 4,
+      "text": "Sensor-Toggle-System für variable Kanaleingänge skizzieren",
+      "done": false
+    },
+    {
+      "id": 5,
+      "text": "Prüfungsleistungen (KES & Bericht) mit Meilensteinplan abstimmen",
+      "done": true
+    }
+  ]
+}
